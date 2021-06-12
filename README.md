@@ -4,7 +4,7 @@ way back when I started to learn programming **7 years ago**.
 
 This was a fairly mindless project; the code pretty much speaks for itself.
 
-A pretty minimalistic take the concept — I was bored, not trying to create the _Hagia Sophia_ of snake games.
+A pretty minimalistic take on the concept — I was bored, not trying to create the _Hagia Sophia_ of snake games.
 
 **Instructions:**
 -----
