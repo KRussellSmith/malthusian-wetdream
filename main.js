@@ -198,8 +198,8 @@ export default function main()
 	const game = Game({
 		snakePos: [0, 0],
 		tick: 100,
-		cellSize,
-		size: Math.min(canvas.width, canvas.height) / size,
+		cellSize: Math.min(canvas.width, canvas.height) / size,
+		size,
 	});
 	const startGame = () =>
 	{
