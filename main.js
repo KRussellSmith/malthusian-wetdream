@@ -1,7 +1,6 @@
 'use strict';
-/*
- a basic, no-frills snake game, by K. Russell Smith
-*/
+// A basic, no-frills snake game, by K. Russell Smith
+
 import { Timer, text } from './aux.js';
 
 const Dir = {
@@ -10,9 +9,7 @@ const Dir = {
 	UP:     [+0, -1],
 	DOWN:   [+0, +1],
 };
-Dir.inverse = (() =>
-{
-	const compleMap = (...pairs) =>
+Dir.inverse = (() => ((...pairs) =>
 	{
 		const result = {};
 		for (const pair of pairs)
@@ -21,11 +18,9 @@ Dir.inverse = (() =>
 			result[pair[1]] = pair[0];
 		}
 		return result;
-	};
-	return compleMap(
+	})(
 		[Dir.LEFT, Dir.RIGHT],
-		[Dir.UP,   Dir.DOWN]);
-})();
+		[Dir.UP,   Dir.DOWN]))();
 
 class Snake
 {
@@ -36,20 +31,17 @@ class Snake
 	}
 	grow()
 	{
-		const [ x, y ] = this.nodes[0];
-		const [ growX, growY ] = this.dir;
-		this.nodes.unshift([x + growX, y + growY]);
+		this.nodes.unshift([this.head[0] + this.dir[0], this.head[1] + this.dir[1]]);
 	}
 	move()
 	{
-		const { head, dir } = this;
 		for (let i = this.nodes.length - 1; i >= 1; --i)
 		{
 			this.nodes[i][0] = this.nodes[i - 1][0];
 			this.nodes[i][1] = this.nodes[i - 1][1];
 		}
-		head[0] += dir[0];
-		head[1] += dir[1];
+		this.head[0] += this.dir[0];
+		this.head[1] += this.dir[1];
 	}
 	turn(dir)
 	{
@@ -58,22 +50,13 @@ class Snake
 			this.dir = dir;
 		}
 	}
-	get touchingSelf()
+	get bitSelf()
 	{
-		for (let i = this.nodes.length - 1; i >= 0; --i)
+		for (let i = this.nodes.length - 1; i >= 1; --i)
 		{
-			for (const node of this.nodes)
+			if (this.nodes[i][0] === this.head[0] && this.nodes[i][1] === this.head[1])
 			{
-				if (node === this.nodes[i])
-				{
-					continue;
-				}
-				if (
-					this.nodes[i][0] === node[0] &&
-					this.nodes[i][1] === node[1])
-				{
-					return true;
-				}
+				return true;
 			}
 		}
 		return false;
@@ -85,19 +68,8 @@ class Snake
 	
 	OOB(width, height)
 	{
-		for (let i = this.nodes.length - 1; i >= 0; --i)
-		{
-			const node = this.nodes[i];
-			if (
-				node[0] < 0 ||
-				node[1] < 0 ||
-				node[0] >= width ||
-				node[1] >= height)
-			{
-				return true;
-			}
-		}
-		return false;
+		const { head } = this;
+		return (head[0] < 0 || head[1] < 0 || head[0] >= width || head[1] >= height);
 	}
 	get length()
 	{
@@ -155,21 +127,25 @@ const Game = ({
 		ctx.translate(
 			(width - size * cellSize) / 2,
 			(height - size * cellSize) / 2);
-		ctx.fillStyle = '#80F080';
-		for (const node of snake.nodes)
+		
+		for (let i = snake.nodes.length - 1; i >= 0; --i)
 		{
-			ctx.fillRect(node[0] * cellSize, node[1] * cellSize, cellSize, cellSize);
+			ctx.fillStyle = snake.nodes[i] === snake.head ? '#F06020' : '#201010';
+			ctx.fillRect(snake.nodes[i][0] * cellSize, snake.nodes[i][1] * cellSize, cellSize, cellSize);
 		}
+		
 		ctx.fillStyle = '#20C8F0';
 		ctx.fillRect(
 			fish[0] * cellSize, fish[1] * cellSize,
 			cellSize, cellSize);
+		
 		ctx.strokeStyle = '#F08080';
 		ctx.lineWidth   = width / 200;
 		ctx.strokeRect(
 			ctx.lineWidth / 2, ctx.lineWidth / 2,
 			size * cellSize - ctx.lineWidth, size * cellSize - ctx.lineWidth);
 		ctx.restore();
+		
 		ctx.textAlign = 'left';
 		ctx.textBaseline = 'top';
 		text(ctx, `${this.points}\n${this.highScore}`, width * 0.025, height * 0.025, {
@@ -179,8 +155,7 @@ const Game = ({
 	},
 	get over()
 	{
-		const { snake } = this;
-		return snake.OOB(size, size) || snake.touchingSelf;
+		return this.snake.OOB(size, size) || this.snake.bitSelf;
 	},
 	spawnFish()
 	{
@@ -189,7 +164,7 @@ const Game = ({
 		{
 			return;
 		}
-		let check = () =>
+		const check = () =>
 		{
 			for (const node of snake.nodes)
 			{
@@ -208,8 +183,7 @@ const Game = ({
 	},
 	onSwipe(dir)
 	{
-		const { snake } = this;
-		snake.turn(dir);
+		this.snake.turn(dir);
 	}
 });
 
@@ -219,20 +193,14 @@ export default function main()
 	canvas.width = canvas.clientWidth;
 	canvas.height = canvas.clientHeight;
 	const ctx = canvas.getContext`2d`;
-	const size = 30;
 	
-	const cellSize = (() =>
-	{
-		const { width, height } = canvas;
-		return Math.min(width, height) / size;
-	})();
-	const config = {
+	const size = 30;
+	const game = Game({
 		snakePos: [0, 0],
 		tick: 100,
 		cellSize,
-		size,
-	};
-	let game = Game(config);
+		size: Math.min(canvas.width, canvas.height) / size,
+	});
 	const startGame = () =>
 	{
 		game.init();
