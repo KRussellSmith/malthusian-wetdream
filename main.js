@@ -1,6 +1,5 @@
 'use strict';
-// A basic, no-frills snake game, by K. Russell Smith
-
+// Un juego de Snake básico, by K. Russell Smith
 import { Timer, text } from './aux.js';
 
 const Dir = {
@@ -45,7 +44,7 @@ class Snake
 	}
 	turn(dir)
 	{
-		if (this.length === 1 || dir !== Dir.inverse[this.dir])
+		if (this.nodes.length === 1 || dir !== Dir.inverse[this.dir])
 		{
 			this.dir = dir;
 		}
@@ -61,19 +60,14 @@ class Snake
 		}
 		return false;
 	}
-	get head()
-	{
-		return this.nodes[0];
-	}
-	
 	OOB(width, height)
 	{
 		const { head } = this;
 		return (head[0] < 0 || head[1] < 0 || head[0] >= width || head[1] >= height);
 	}
-	get length()
+	get head()
 	{
-		return this.nodes.length;
+		return this.nodes[0];
 	}
 }
 
@@ -90,7 +84,7 @@ const Game = ({
 	{
 		this.snake     = new Snake(snakePos[0], snakePos[1]),
 		this.points    = 0;
-		this.highScore = localStorage.getItem(this.storageKey) ?? 0;
+		this.highScore = localStorage.getItem(this.storageKey) || 0;
 		this.spawnFish();
 		return this;
 	},
@@ -116,7 +110,7 @@ const Game = ({
 		}
 		else
 		{
-			snake.move(snake.dir);
+			snake.move();
 		}
 	},
 	draw(ctx)
@@ -160,7 +154,7 @@ const Game = ({
 	spawnFish()
 	{
 		const { snake, fish } = this;
-		if (snake.length >= size ** 2)
+		if (snake.nodes.length >= size ** 2)
 		{
 			return;
 		}
@@ -211,7 +205,7 @@ export default function main()
 	{
 		let time = 0;
 		const timer = Timer();
-		return function draw(mil)
+		return mil =>
 		{
 			timer.update(mil);
 			if (!game.over)
