@@ -1,5 +1,5 @@
 'use strict';
-// Un juego de Snake básico, by K. Russell Smith
+// Un juego de Snake básico, por K. Russell Smith
 import { Timer, text } from './aux.js';
 
 const Dir = {
